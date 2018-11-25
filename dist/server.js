@@ -14,7 +14,8 @@ const appModule = new core_1.GraphQLModule({
 const { schema, context } = appModule;
 const server = new apollo_server_express_1.ApolloServer({
     schema,
-    context
+    context,
+    introspection: true
 });
 const app = express();
 server.applyMiddleware({ app });
