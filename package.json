@@ -40,7 +40,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm build"
+      "pre-commit": "git add dist && npm build"
     }
   },
   "scripts": {
