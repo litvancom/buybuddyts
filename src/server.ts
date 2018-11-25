@@ -15,7 +15,8 @@ const { schema, context } = appModule;
 
 const server = new ApolloServer({
   schema,
-  context
+  context,
+  introspection: true
 });
 
 const app = express();
