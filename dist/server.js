@@ -1,9 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@graphql-modules/core");
 const apollo_server_express_1 = require("apollo-server-express");
 const express = require("express");
-const config_1 = require("./config");
+const config_1 = __importDefault(require("./config"));
 const user_module_1 = require("./graphql/user-module");
 const logger_1 = require("./utils/logger");
 const list_module_1 = require("./graphql/list-module");
@@ -19,4 +22,4 @@ const server = new apollo_server_express_1.ApolloServer({
 });
 const app = express();
 server.applyMiddleware({ app });
-app.listen({ port: config_1.port }, () => logger_1.logger.info(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
+app.listen(config_1.default.port, () => logger_1.logger.info(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));

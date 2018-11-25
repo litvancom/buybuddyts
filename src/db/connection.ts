@@ -1,5 +1,5 @@
-import knex from "knex";
+import knex = require("knex");
 
-import {dbConnection} from "../config";
+import config from "../config";
 
-export default knex(dbConnection);
+export default knex(config.dbConnection);

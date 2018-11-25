@@ -1,4 +1,4 @@
-import {dbConnection} from "../config";
+import config from "../config";
 
-export const client =  dbConnection.client;
-export const connection =  dbConnection.connection;
+export const client =  config.dbConnection.client;
+export const connection =  config.dbConnection.connection;
