@@ -19,7 +19,12 @@ const server = new ApolloServer({
   introspection: true
 });
 
+const cors = {
+  origin: "*",
+  credentials: true
+};
+
 const app = express();
-server.applyMiddleware({ app });
+server.applyMiddleware({ app, cors });
 
 app.listen(config.port, () => logger.info(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`));
