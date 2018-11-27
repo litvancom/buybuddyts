@@ -2,7 +2,7 @@
   "name": "buybuddyts",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
   "dependencies": {
     "@graphql-modules/core": "^0.2.8",
     "@types/graphql": "^14.0.3",
@@ -40,16 +40,16 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "rm -rf build && npm build && git add dist/*"
     }
   },
   "scripts": {
     "start": "node dist/server.js",
+    "postinstall": "npm run build",
     "build": "tsc --build tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "node --require ts-node/register ./node_modules/.bin/knex --knexfile ./src/db/knexfile.ts seed:run",
     "knex": "ts-node ./node_modules/.bin/knex --knexfile ./src/db/knexfile.ts",
-    "dev": "node --require ts-node/register $NODE_DEBUG_OPTION src/server.ts"
+    "dev": "tsc --build tsconfigDev.json && node $NODE_DEBUG_OPTION dist/server.js"
   },
   "author": "",
   "license": "ISC"

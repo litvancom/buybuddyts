@@ -55,6 +55,7 @@ import { logCath } from "../utils/logger";
         table.string("valueName");
         table.double("value");
         table.string("category");
+        table.boolean("checked").defaultTo(false);
         table.integer("order");
         table.uuid("listId").notNull();
         table

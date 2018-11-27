@@ -13,26 +13,20 @@ export const ListItemModule = new GraphQLModule({
       value: String
       category: String
       order: Int
+      checked: boolean
     }
-    input NewListItem {
+    input InputListItem {
       name: String!
       valueName: String!
       value: String!
       listId: String!
       category: String
       order: Int
+      checked: boolean
     }
-    input UpdateListItem {
-      name: String
-      valueName: String
-      value: String
-      listId: String
-      category: String
-      order: Int
-    }
-    extend type Mutation {
-      listItemCreate(input: NewListItem!): ListItem! @isAuthenticated
-      listItemUpdate(id: String!, input: UpdateListItem!): ListItem! @isAuthenticated
+    type Mutation {
+      listItemCreate(input: InputListItem!): ListItem! @isAuthenticated
+      listItemUpdate(id: String!, input: InputListItem!): ListItem! @isAuthenticated
       listItemDelete(id: String!): [String] @isAuthenticated
     }
   `,

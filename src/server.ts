@@ -6,9 +6,10 @@ import { UserModule } from "./graphql/user-module";
 import { logger } from "./utils/logger";
 import { ListModule } from "./graphql/list-module";
 import { SharedListModule } from "./graphql/sharedList-module";
+import { ListItemModule } from "./graphql/listItem-module";
 
 const appModule = new GraphQLModule({
-  imports: [UserModule, ListModule, SharedListModule]
+  imports: [UserModule, ListModule, ListItemModule, SharedListModule]
 });
 
 const { schema, context } = appModule;
