@@ -25,9 +25,8 @@ export const deleteListItem = (id: string) => {
     .spread((item?: any) => item);
 };
 
-export const getListItem = (listId: string) => {
+export const getListItems = (listId: string) => {
   return knex(tableName)
     .select()
-    .where({ listId })
-    .first();
+    .where({ listId });
 };

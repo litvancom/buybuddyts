@@ -3,7 +3,7 @@ import gql from "graphql-tag";
 import { GraphQLModule } from "@graphql-modules/core";
 import { ListItemModule } from "./listItem-module";
 import { createList, deleteList, updateList } from "../db/model/list";
-import { getListItem } from "../db/model/listItem";
+import { getListItems } from "../db/model/listItem";
 
 export const ListModule = new GraphQLModule({
   imports: [DirectivesModule, ListItemModule],
@@ -31,7 +31,7 @@ export const ListModule = new GraphQLModule({
   resolvers: {
     List: {
       items: async ({ id }, args, context) => {
-        return getListItem(id);
+        return getListItems(id);
       }
     },
     Query: {
