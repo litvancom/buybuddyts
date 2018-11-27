@@ -13,7 +13,7 @@ export const ListItemModule = new GraphQLModule({
       value: String
       category: String
       order: Int
-      checked: boolean
+      checked: Boolean
     }
     input InputListItem {
       name: String!
@@ -22,7 +22,7 @@ export const ListItemModule = new GraphQLModule({
       listId: String!
       category: String
       order: Int
-      checked: boolean
+      checked: Boolean
     }
     type Mutation {
       listItemCreate(input: InputListItem!): ListItem! @isAuthenticated
