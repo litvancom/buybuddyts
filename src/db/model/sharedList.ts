@@ -1,12 +1,34 @@
 import knex from "../connection";
+import { logger } from "../../utils/logger";
 
 const tableName = "sharedLists";
+const sharedListsUsers = "sharedListsUsers";
 
-export const createSharedList = (data: any) => {
-  return knex(tableName)
+export const createSharedList = async (data: any) => {
+  const { receiversId, listId } = data;
+  delete data.receiversId;
+
+  const sharedList = await knex(tableName)
     .insert(data)
     .returning("*")
-    .spread((item: any ) => item);
+    .spread((item: any) => item);
+
+  if (receiversId) {
+    const relData = receiversId.map((item: any) => {
+      return { sharedListId: sharedList.id, userId: item };
+    });
+
+    await knex(sharedListsUsers).insert(relData);
+  }
+
+  return Promise.resolve(sharedList);
+};
+
+export const getSharedListUsers = (sharedListId: string) => {
+  return knex(sharedListsUsers)
+    .where({ sharedListId })
+    .leftJoin("users", "users.id", "userId")
+    .select("users.*");
 };
 
 export const updateSharedList = (id: any, data: any) => {
@@ -14,7 +36,7 @@ export const updateSharedList = (id: any, data: any) => {
     .update(data)
     .where({ id })
     .returning("*")
-    .spread((item) => item);
+    .spread(item => item);
 };
 
 export const deleteSharedList = (id: any) => {

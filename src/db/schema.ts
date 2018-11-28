@@ -1,7 +1,10 @@
 import { logCath } from "../utils/logger";
 
+import connection from "./connection";
+import { TableBuilder } from "knex";
+
 (async () => {
-  const knex = await require("./connection");
+  const knex = await connection;
 
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
 
@@ -9,7 +12,7 @@ import { logCath } from "../utils/logger";
 
   if (usersExists === false) {
     await knex.schema
-      .createTable("users", (table: any) => {
+      .createTable("users", (table: TableBuilder) => {
         table
           .uuid("id")
           .primary("user_id")
@@ -25,13 +28,13 @@ import { logCath } from "../utils/logger";
 
   if (listsExists === false) {
     await knex.schema
-      .createTable("lists", (table: any) => {
+      .createTable("lists", (table: TableBuilder) => {
         table
           .uuid("id")
           .primary()
           .defaultTo(knex.raw("uuid_generate_v4()"));
         table.string("title");
-        table.uuid("userId").notNull();
+        table.uuid("userId").notNullable();
         table
           .foreign("userId")
           .references("id")
@@ -46,18 +49,19 @@ import { logCath } from "../utils/logger";
 
   if (listItemsExists === false) {
     await knex.schema
-      .createTable(listItemsTable, (table: any) => {
+      .createTable(listItemsTable, (table: TableBuilder) => {
         table
           .uuid("id")
           .primary()
           .defaultTo(knex.raw("uuid_generate_v4()"));
         table.string("name");
         table.string("valueName");
+        // @ts-ignore
         table.double("value");
         table.string("category");
         table.boolean("checked").defaultTo(false);
         table.integer("order");
-        table.uuid("listId").notNull();
+        table.uuid("listId").notNullable();
         table
           .foreign("listId")
           .references("id")
@@ -72,17 +76,17 @@ import { logCath } from "../utils/logger";
 
   if (sharedListsExists === false) {
     await knex.schema
-      .createTable(sharedListsTable, (table: any) => {
+      .createTable(sharedListsTable, (table: TableBuilder) => {
         table
           .uuid("id")
           .primary()
           .defaultTo(knex.raw("uuid_generate_v4()"));
-        table.uuid("listId").notNull();
+        table.uuid("listId").notNullable();
         table.uuid("receiverId");
         table.string("password");
         table
           .enum("chmod", ["r", "rw"])
-          .notNull()
+          .notNullable()
           .defaultTo("r");
         table
           .foreign("receiverId")
@@ -96,12 +100,25 @@ import { logCath } from "../utils/logger";
       })
       .catch(logCath);
 
-    await knex.schema.raw(`
-      ALTER TABLE "${sharedListsTable}"
-        ADD CONSTRAINT CK_one_is_null
-      CHECK (
-        "${sharedListsTable}"."receiverId" IS NOT NULL OR "${sharedListsTable}"."password" IS NOT NULL
-      );`);
+    // await knex.schema.raw(`
+    //   ALTER TABLE "${sharedListsTable}"
+    //     ADD CONSTRAINT CK_one_is_null
+    //   CHECK (
+    //     "${sharedListsTable}"."receiverId" IS NOT NULL OR "${sharedListsTable}"."password" IS NOT NULL
+    //   );`);
+  }
+
+  const sharedListsUsersTable = "sharedListsUsers";
+  const sharedListsUsersExists = await knex.schema.hasTable(sharedListsUsersTable);
+
+  if (sharedListsUsersExists === false) {
+    await knex.schema
+      .createTable(sharedListsUsersTable, (table: TableBuilder) => {
+        table.uuid("userId");
+        table.uuid("sharedListId");
+        table.unique(["userId", "sharedListId"]);
+      })
+      .catch(logCath);
   }
 
   process.exit();

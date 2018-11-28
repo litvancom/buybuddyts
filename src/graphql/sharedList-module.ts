@@ -2,28 +2,33 @@ import { DirectivesModule } from "./directives";
 import gql from "graphql-tag";
 import { GraphQLModule } from "@graphql-modules/core";
 import bcrypt = require("bcrypt");
-import { createSharedList, deleteSharedList, getListsFromSharedList, getSharedList, updateSharedList } from "../db/model/sharedList";
+import {
+  createSharedList,
+  deleteSharedList,
+  getListsFromSharedList,
+  getSharedList,
+  getSharedListUsers,
+  updateSharedList
+} from "../db/model/sharedList";
 import { ListModule } from "./list-module";
+import { UserModule } from "./user-module";
+import { logger } from "../utils/logger";
 
 export const SharedListModule = new GraphQLModule({
-  imports: [DirectivesModule, ListModule],
+  imports: [DirectivesModule, ListModule, UserModule],
   typeDefs: gql`
     type SharedList {
       id: ID!
       list: List!
-      receiverId: String
+      receivers: [User]
       chmod: String
     }
 
-    input NewSharedList {
+    input InputSharedList {
       listId: String!
-      receiverId: String
+      receiversId: [String]
       chmod: String
       password: String
-    }
-
-    input UpdateSharedList {
-      chmod: String!
     }
 
     type Query {
@@ -31,8 +36,8 @@ export const SharedListModule = new GraphQLModule({
     }
 
     type Mutation {
-      sharedListCreate(input: NewSharedList!): SharedList!
-      sharedListUpdate(id: String, input: UpdateSharedList!): SharedList!
+      sharedListCreate(input: InputSharedList!): SharedList!
+      sharedListUpdate(id: String, input: InputSharedList!): SharedList!
       sharedListDelete(id: String!): String
     }
   `,
@@ -54,6 +59,10 @@ export const SharedListModule = new GraphQLModule({
     SharedList: {
       list: async (_, args, context) => {
         return await getListsFromSharedList(_.id);
+      },
+      receivers: async (root, args, context) => {
+        logger.info(root);
+        return getSharedListUsers(root.id);
       }
     },
     Mutation: {

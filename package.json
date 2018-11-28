@@ -49,7 +49,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "node --require ts-node/register ./node_modules/.bin/knex --knexfile ./src/db/knexfile.ts seed:run",
     "knex": "ts-node ./node_modules/.bin/knex --knexfile ./src/db/knexfile.ts",
-    "dev": "tsc --build tsconfigDev.json && node $NODE_DEBUG_OPTION dist/server.js"
+    "dev": "tsc --build tsconfigDev.json && node $NODE_DEBUG_OPTION dist/server.js",
+    "dbsync": "tsc --build tsconfigDev.json && node $NODE_DEBUG_OPTION dist/db/schema.js"
   },
   "author": "",
   "license": "ISC"
