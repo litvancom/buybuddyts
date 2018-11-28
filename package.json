@@ -42,6 +42,9 @@
     "hooks": {
     }
   },
+  "engines": {
+    "node": "10.9"
+  },
   "scripts": {
     "start": "node dist/server.js",
     "postinstall": "npm run build",
