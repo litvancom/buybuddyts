@@ -4,6 +4,7 @@ import { GraphQLModule } from "@graphql-modules/core";
 import { ListItemModule } from "./listItem-module";
 import { createList, deleteList, updateList } from "../db/model/list";
 import { getListItems } from "../db/model/listItem";
+import { logger } from "../utils/logger";
 
 export const ListModule = new GraphQLModule({
   imports: [DirectivesModule, ListItemModule],
@@ -40,7 +41,7 @@ export const ListModule = new GraphQLModule({
       }
     },
     Mutation: {
-      listCreate: async (_, { input, id }, context) => {
+      listCreate: async (_, { input }, { currentUser: { id } }) => {
         return createList(input, id);
       },
       listUpdate: async (_, { input, id }, context) => {
