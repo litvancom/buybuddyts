@@ -1,32 +1,33 @@
 import knex from "../connection";
 
-const tableName = "listItems";
+export default class ListItemModel {
+  public static create(data: any) {
+    return knex(ListItemModel.tableName)
+      .insert(data)
+      .returning("*")
+      .spread((item?: any) => item);
+  }
 
-export const createListItem = (data: any) => {
-  return knex(tableName)
-    .insert(data)
-    .returning("*")
-    .spread((item?: any) => item);
-};
+  public static update(id: string, data: any) {
+    return knex(ListItemModel.tableName)
+      .update(data)
+      .where({ id })
+      .returning("*")
+      .spread((item?: any) => item);
+  }
 
-export const updateListItem = (id: string, data: any) => {
-  return knex(tableName)
-    .update(data)
-    .where({ id })
-    .returning("*")
-    .spread((item?: any) => item);
-};
+  public static delete(id: string) {
+    return knex(ListItemModel.tableName)
+      .delete()
+      .where({ id })
+      .returning("id")
+      .spread((item?: any) => item);
+  }
 
-export const deleteListItem = (id: string) => {
-  return knex(tableName)
-    .delete()
-    .where({ id })
-    .returning("id")
-    .spread((item?: any) => item);
-};
-
-export const getListItems = (listId: string) => {
-  return knex(tableName)
-    .select()
-    .where({ listId });
-};
+  public static findByListId(listId: string) {
+    return knex(ListItemModel.tableName)
+      .select()
+      .where({ listId });
+  }
+  private static readonly tableName = "listItems";
+}

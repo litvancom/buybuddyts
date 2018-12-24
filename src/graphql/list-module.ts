@@ -2,9 +2,9 @@ import { DirectivesModule } from "./directives";
 import gql from "graphql-tag";
 import { GraphQLModule } from "@graphql-modules/core";
 import { ListItemModule } from "./listItem-module";
-import { createList, deleteList, updateList } from "../db/model/list";
-import { getListItems } from "../db/model/listItem";
 import { logger } from "../utils/logger";
+import ListModel from "../db/model/list";
+import ListItemModel from "../db/model/listItem";
 
 export const ListModule = new GraphQLModule({
   imports: [DirectivesModule, ListItemModule],
@@ -32,7 +32,7 @@ export const ListModule = new GraphQLModule({
   resolvers: {
     List: {
       items: async ({ id }, args, context) => {
-        return getListItems(id);
+        return ListItemModel.findByListId(id);
       }
     },
     Query: {
@@ -42,13 +42,13 @@ export const ListModule = new GraphQLModule({
     },
     Mutation: {
       listCreate: async (_, { input }, { currentUser: { id } }) => {
-        return createList(input, id);
+        return ListModel.create(input, id);
       },
       listUpdate: async (_, { input, id }, context) => {
-        return updateList(id, input);
+        return ListModel.update(id, input);
       },
       listDelete: async (_, { id }: { id: string }, context) => {
-        return deleteList(id);
+        return ListModel.delete(id);
       }
     }
   }

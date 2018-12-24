@@ -1,38 +1,35 @@
 import knex from "../connection";
 
-const tableName = "lists";
+export default class ListModel {
+  public static create(data: any, userId: string) {
+    return knex(ListModel.tableName)
+      .insert({ ...data, userId })
+      .returning("*")
+      .spread((item?: any) => item);
+  }
 
-export const createList = (data: any, userId: string) => {
-  return knex(tableName)
-    .insert({ ...data, userId })
-    .returning("*").spread((item?: any) => item);
-};
+  public static update(id: string, data: any) {
+    return knex(ListModel.tableName)
+      .update(data)
+      .where({ id })
+      .returning("*")
+      .spread((item?: any) => item);
+  }
 
-export const updateList = (id: string, data: any) => {
-  return knex(tableName)
-    .update(data)
-    .where({ id })
-    .returning("*").spread((item?: any) => item);
-};
+  public static delete(id: string) {
+    return knex(ListModel.tableName)
+      .delete()
+      .where({ id })
+      .returning("id")
+      .spread((item?: any) => item);
+  }
 
-export const deleteList = (id: string) => {
-  return knex(tableName)
-    .delete()
-    .where({ id })
-    .returning("id").spread((item?: any) => item);
-};
-
-export const getUserLists = (userId: string, filter?: any) => {
-  return knex(tableName)
-    .select()
-    .where({
-      userId,
-    });
-
-  // .andWhere((builder)=>{
-  //
-  //   for(keys of Object.keys(filter)){
-  //     console.log(filter)
-  //   }
-  // });
-};
+  public static findByUserId(userId: string, filter?: any) {
+    return knex(ListModel.tableName)
+      .select()
+      .where({
+        userId
+      });
+  }
+  private static readonly tableName = "lists";
+}

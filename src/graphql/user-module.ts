@@ -1,11 +1,11 @@
 import { GraphQLModule } from "@graphql-modules/core";
 import bcrypt = require("bcrypt");
 import gql from "graphql-tag";
-import { getUserLists } from "../db/model/list";
-import { createUser, findLogin } from "../db/model/user";
 import { signToken } from "../services/auth";
 import { DirectivesModule } from "./directives";
 import { ListModule } from "./list-module";
+import UserModel from "../db/model/user";
+import ListModel from "../db/model/list";
 
 // @ts-ignore
 export const UserModule = new GraphQLModule({
@@ -44,7 +44,7 @@ export const UserModule = new GraphQLModule({
   resolvers: {
     AuthorizedUser: {
       lists: async (root: any, args: any, { currentUser: { id: userId } }: { userId: string; currentUser: any }) => {
-        return await getUserLists(userId);
+        return await ListModel.findByUserId(userId);
       }
     },
     Query: {
@@ -52,7 +52,7 @@ export const UserModule = new GraphQLModule({
         return context.currentUser;
       },
       userLogin: async (_: any, { userName, password }: { userName: string; password: string }, context: any) => {
-        const [user = {}] = await findLogin({ userName });
+        const [user = {}] = await UserModel.findLogin({ userName });
         if (await bcrypt.compare(password, user.password)) {
           delete user.password;
 
@@ -69,7 +69,7 @@ export const UserModule = new GraphQLModule({
     Mutation: {
       userRegister: async (root: any, { input }: { input: any }, context: any) => {
         input.password = await bcrypt.hash(input.password, 10);
-        return await createUser(input);
+        return await UserModel.create(input);
       }
     }
   }

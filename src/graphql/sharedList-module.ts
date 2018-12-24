@@ -2,17 +2,10 @@ import { DirectivesModule } from "./directives";
 import gql from "graphql-tag";
 import { GraphQLModule } from "@graphql-modules/core";
 import bcrypt = require("bcrypt");
-import {
-  createSharedList,
-  deleteSharedList,
-  getListsFromSharedList,
-  getSharedList,
-  getSharedListUsers,
-  updateSharedList
-} from "../db/model/sharedList";
 import { ListModule } from "./list-module";
 import { UserModule } from "./user-module";
 import { logger } from "../utils/logger";
+import SharedListModel from "../db/model/sharedList";
 
 export const SharedListModule = new GraphQLModule({
   imports: [DirectivesModule, ListModule, UserModule],
@@ -44,7 +37,7 @@ export const SharedListModule = new GraphQLModule({
   resolvers: {
     Query: {
       sharedList: async (_, { id, password }, context) => {
-        const sharedList = await getSharedList(id);
+        const sharedList = await SharedListModel.get(id);
         if (sharedList.password && password && bcrypt.compareSync(password, sharedList.password)) {
           return sharedList;
         } else if (sharedList.password && !password) {
@@ -58,11 +51,11 @@ export const SharedListModule = new GraphQLModule({
     },
     SharedList: {
       list: async (_, args, context) => {
-        return await getListsFromSharedList(_.id);
+        return await SharedListModel.getLists(_.id);
       },
       receivers: async (root, args, context) => {
         logger.info(root);
-        return getSharedListUsers(root.id);
+        return SharedListModel.getSharedListUsers(root.id);
       }
     },
     Mutation: {
@@ -70,13 +63,13 @@ export const SharedListModule = new GraphQLModule({
         if (input.password) {
           input.password = await bcrypt.hash(input.password, 10);
         }
-        return await createSharedList(input);
+        return await SharedListModel.create(input);
       },
       sharedListUpdate: async (_, { id, input }, context) => {
-        return await updateSharedList(id, input);
+        return await SharedListModel.update(id, input);
       },
       sharedListDelete: async (_, { id }, context) => {
-        return deleteSharedList(id);
+        return SharedListModel.delete(id);
       }
     }
   }

@@ -1,6 +1,6 @@
 import bluebird = require("bluebird");
 import jwt = require("jsonwebtoken");
-import { findUserById } from "../../db/model/user";
+import UserModel from "../../db/model/user";
 
 const secret = "secret";
 
@@ -23,7 +23,7 @@ export const checkAuth = async (authorization: any) => {
   const {
     data: { id }
   }: any = jwt.verify(authorization, secret);
-  const [user = {}] = await findUserById(id);
+  const [user = {}] = await UserModel.findUserById(id);
   delete user.password;
 
   return user;

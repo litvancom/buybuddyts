@@ -2,21 +2,23 @@ import knex from "../connection";
 
 const tableName = "users";
 
-export const createUser = (data: any) => {
-  return knex
-    .insert(data)
-    .returning(["id", "userName"])
-    .table(tableName);
-};
+export default class UserModel {
+  public static create(data: any) {
+    return knex
+      .insert(data)
+      .returning(["id", "userName"])
+      .table(tableName);
+  }
 
-export const findLogin = (data: any) => {
-  return knex(tableName)
-    .select()
-    .where(data);
-};
+  public static findLogin(data: any) {
+    return knex(tableName)
+      .select()
+      .where(data);
+  }
 
-export const findUserById = (id: any) => {
-  return knex(tableName)
-    .select()
-    .where({ id });
-};
+  public static findUserById(id: any) {
+    return knex(tableName)
+      .select()
+      .where({ id });
+  }
+}

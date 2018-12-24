@@ -1,7 +1,8 @@
 import { DirectivesModule } from "./directives";
 import gql from "graphql-tag";
 import { GraphQLModule } from "@graphql-modules/core";
-import { createListItem, deleteListItem, updateListItem } from "../db/model/listItem";
+import ListModel from "../db/model/list";
+import ListItemModel from "../db/model/listItem";
 
 export const ListItemModule = new GraphQLModule({
   imports: [DirectivesModule],
@@ -38,13 +39,13 @@ export const ListItemModule = new GraphQLModule({
     },
     Mutation: {
       listItemCreate: async (_, { input }, context) => {
-        return createListItem(input);
+        return ListItemModel.create(input);
       },
       listItemUpdate: async (_, { id, input }, context) => {
-        return updateListItem(id, input);
+        return ListItemModel.update(id, input);
       },
       listItemDelete: async (_, { id }: { id: string }, context) => {
-        deleteListItem(id);
+        ListItemModel.delete(id);
       }
     }
   }
