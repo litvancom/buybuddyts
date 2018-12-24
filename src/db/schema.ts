@@ -2,23 +2,32 @@ import { logCath } from "../utils/logger";
 
 import connection from "./connection";
 import { TableBuilder } from "knex";
+import UserModel from "./model/user";
 
 (async () => {
   const knex = await connection;
 
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
 
-  const usersExists = await knex.schema.hasTable("users");
+  const usersTable = "users";
+  const usersExists = await knex.schema.hasTable(usersTable);
 
   if (usersExists === false) {
     await knex.schema
-      .createTable("users", (table: TableBuilder) => {
+      .createTable(usersTable, (table: TableBuilder) => {
         table
           .uuid("id")
           .primary("user_id")
           .defaultTo(knex.raw("uuid_generate_v4()"));
-        table.string("userName").unique();
-        table.string("email").unique();
+        table
+          .string("userName")
+          .unique()
+          .notNullable();
+        table
+          .string("email")
+          .unique()
+          .notNullable();
+        table.boolean("emailIsConfirmed").defaultTo(false);
         table.string("password");
       })
       .catch(logCath);
@@ -99,13 +108,6 @@ import { TableBuilder } from "knex";
           .onDelete("CASCADE");
       })
       .catch(logCath);
-
-    // await knex.schema.raw(`
-    //   ALTER TABLE "${sharedListsTable}"
-    //     ADD CONSTRAINT CK_one_is_null
-    //   CHECK (
-    //     "${sharedListsTable}"."receiverId" IS NOT NULL OR "${sharedListsTable}"."password" IS NOT NULL
-    //   );`);
   }
 
   const sharedListsUsersTable = "sharedListsUsers";
@@ -117,6 +119,24 @@ import { TableBuilder } from "knex";
         table.uuid("userId");
         table.uuid("sharedListId");
         table.unique(["userId", "sharedListId"]);
+      })
+      .catch(logCath);
+  }
+
+  const friendListTable = "friendList";
+  const friendListExists = await knex.schema.hasTable(friendListTable);
+
+  if (friendListExists === false) {
+    await knex.schema
+      .createTable(friendListTable, (table: any) => {
+        table.uuid("userId");
+        table.uuid("friendId");
+        table.unique(["userId", "friendId"]);
+        table
+          .foreign("friendId")
+          .references("id")
+          .inTable(UserModel.tableName)
+          .onDelete("CASCADE");
       })
       .catch(logCath);
   }

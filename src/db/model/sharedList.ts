@@ -1,8 +1,19 @@
 import knex from "../connection";
-import { logger } from "../../utils/logger";
+import Joi = require("joi");
 
 const tableName = "sharedLists";
 const sharedListsUsers = "sharedListsUsers";
+
+const createUpdateSchema = Joi.object()
+  .keys({
+    listId: Joi.string()
+      .guid()
+      .required(),
+    chmod: Joi.string().valid(["r", "rw"]),
+    receiversId: Joi.array().items([Joi.string().guid()]),
+    password: Joi.string().min(1)
+  })
+  .or("receiversId", "password");
 
 export default class SharedListModel {
   public static getSharedListUsers(sharedListId: string) {
@@ -12,6 +23,8 @@ export default class SharedListModel {
       .select("users.*");
   }
   public static async create(data: any) {
+    await Joi.validate(data, createUpdateSchema, { allowUnknown: true });
+
     const { receiversId, listId } = data;
     delete data.receiversId;
 

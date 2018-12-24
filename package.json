@@ -5,7 +5,6 @@
   "main": "dist/server.js",
   "dependencies": {
     "@graphql-modules/core": "^0.2.8",
-    "@types/graphql": "^14.0.3",
     "apollo-server-express": "^2.2.2",
     "bcrypt": "^3.0.2",
     "bluebird": "^3.5.3",
@@ -14,6 +13,7 @@
     "express": "^4.16.4",
     "graphql": "^14.0.2",
     "graphql-tools": "^4.0.3",
+    "joi": "^14.3.0",
     "jsonwebtoken": "^8.4.0",
     "knex": "^0.15.2",
     "lodash": "^4.17.11",
@@ -25,6 +25,8 @@
     "typescript": "^3.1.6"
   },
   "devDependencies": {
+    "@types/graphql": "^14.0.3",
+    "@types/joi": "^14.0.1",
     "@types/bcrypt": "^3.0.0",
     "@types/bluebird": "^3.5.24",
     "@types/body-parser": "^1.17.0",
@@ -39,8 +41,7 @@
     "ts-node": "^7.0.1"
   },
   "husky": {
-    "hooks": {
-    }
+    "hooks": {}
   },
   "engines": {
     "node": "10.9"
@@ -50,7 +51,7 @@
     "postinstall": "npm run build",
     "build": "tsc --build tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node --require ts-node/register ./node_modules/.bin/knex --knexfile ./src/db/knexfile.ts seed:run",
+    "seed": "tsc --build tsconfigDev.json && node ./node_modules/.bin/knex --knexfile dist/db/knexfile.js seed:run",
     "knex": "ts-node ./node_modules/.bin/knex --knexfile ./src/db/knexfile.ts",
     "dev": "tsc --build tsconfigDev.json && node $NODE_DEBUG_OPTION dist/server.js",
     "dbsync": "tsc --build tsconfigDev.json && node $NODE_DEBUG_OPTION dist/db/schema.js"

@@ -1,11 +1,11 @@
 import { GraphQLModule } from "@graphql-modules/core";
-import bcrypt = require("bcrypt");
 import gql from "graphql-tag";
 import { signToken } from "../services/auth";
 import { DirectivesModule } from "./directives";
 import { ListModule } from "./list-module";
 import UserModel from "../db/model/user";
 import ListModel from "../db/model/list";
+import bcrypt = require("bcrypt");
 
 // @ts-ignore
 export const UserModule = new GraphQLModule({
@@ -14,10 +14,12 @@ export const UserModule = new GraphQLModule({
     type User {
       id: ID!
       userName: String!
+      email: String!
     }
 
     input NewUser {
       userName: String!
+      email: String!
       password: String!
     }
 
@@ -35,10 +37,14 @@ export const UserModule = new GraphQLModule({
     type Query {
       me: AuthorizedUser @isAuthenticated
       userLogin(userName: String, password: String): Token!
+      userFriends: User! @isAuthenticated
+      userFindNewFriends(query: String!): [User]! @isAuthenticated
     }
 
     type Mutation {
       userRegister(input: NewUser): User!
+      userAddFriends(friendsIds: [ID]!): [User] @isAuthenticated
+      userDeleteFriends(friendsIds: [ID]!): Boolean @isAuthenticated
     }
   `,
   resolvers: {
@@ -64,12 +70,25 @@ export const UserModule = new GraphQLModule({
         } else {
           throw new Error("User does not match");
         }
+      },
+      userFriends: async (root, args, { currentUser: { id } }) => {
+        return await UserModel.getFriends(id);
+      },
+      userFindNewFriends: async (root, { query }: { query: string }, { currentUser: { id } }) => {
+        return UserModel.findNewFriends(id, query);
       }
     },
+
     Mutation: {
       userRegister: async (root: any, { input }: { input: any }, context: any) => {
         input.password = await bcrypt.hash(input.password, 10);
         return await UserModel.create(input);
+      },
+      userAddFriends: async (root, { friendsIds }: { friendsIds: string[] }, { currentUser: { id } }) => {
+        return UserModel.addFriends(id, friendsIds);
+      },
+      userDeleteFriends: async (root, { friendsIds }: { friendsIds: string[] }, { currentUser: { id } }) => {
+        return UserModel.deleteFriends(id, friendsIds);
       }
     }
   }
