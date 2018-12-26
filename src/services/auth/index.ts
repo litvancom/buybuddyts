@@ -5,7 +5,7 @@ import moment = require("moment");
 import requestPromise = require("request-promise");
 
 const secret = "secret";
-
+//
 const jwtSignToken = bluebird.promisify(jwt.sign);
 
 export default class AuthService {
