@@ -1,11 +1,13 @@
 import { GraphQLModule } from "@graphql-modules/core";
 import gql from "graphql-tag";
-import { signToken } from "../services/auth";
 import { DirectivesModule } from "./directives";
 import { ListModule } from "./list-module";
 import UserModel from "../db/model/user";
 import ListModel from "../db/model/list";
 import bcrypt = require("bcrypt");
+import rp = require("request-promise");
+import { logger } from "../utils/logger";
+import AuthService from "../services/auth";
 
 // @ts-ignore
 export const UserModule = new GraphQLModule({
@@ -39,6 +41,7 @@ export const UserModule = new GraphQLModule({
       userLogin(userName: String, password: String): Token!
       userFriends: User! @isAuthenticated
       userFindNewFriends(query: String!): [User]! @isAuthenticated
+      userFbLogin(token: String!): Token
     }
 
     type Mutation {
@@ -62,7 +65,7 @@ export const UserModule = new GraphQLModule({
         if (await bcrypt.compare(password, user.password)) {
           delete user.password;
 
-          const bearer = await signToken(user);
+          const bearer = await AuthService.signToken(user);
           return {
             bearer,
             user
@@ -76,6 +79,15 @@ export const UserModule = new GraphQLModule({
       },
       userFindNewFriends: async (root, { query }: { query: string }, { currentUser: { id } }) => {
         return UserModel.findNewFriends(id, query);
+      },
+      userFbLogin: async (root, { token }, context) => {
+        const fbData = await AuthService.fbCheckToken(token);
+        const user = await UserModel.fbLogin(fbData);
+
+        return {
+          bearer: AuthService.signToken(user),
+          user
+        };
       }
     },
 

@@ -4,7 +4,7 @@ import { SchemaDirectiveVisitor } from "apollo-server-express";
 import { defaultFieldResolver, GraphQLField } from "graphql";
 import { logCath } from "../utils/logger";
 import { IncomingMessage } from "http";
-import { checkAuth } from "../services/auth";
+import AuthService from "../services/auth";
 
 export class IsAuthenticated extends SchemaDirectiveVisitor {
   // public visitObject(object: GraphQLObjectType): GraphQLObjectType | void | null {
@@ -40,7 +40,7 @@ export const DirectivesModule = new GraphQLModule({
       headers: { authorization }
     } = req;
     return {
-      currentUser: await checkAuth(authorization).catch(logCath)
+      currentUser: await AuthService.checkAuth(authorization).catch(logCath)
     };
   }
 });

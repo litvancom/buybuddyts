@@ -141,5 +141,28 @@ import UserModel from "./model/user";
       .catch(logCath);
   }
 
+  const socialIdTable = "socialId";
+  const socialIdExists = await knex.schema.hasTable(socialIdTable);
+
+  if (socialIdExists === false) {
+    await knex.schema
+      .createTable(socialIdTable, (table: any) => {
+        table
+          .uuid("id")
+          .primary()
+          .defaultTo(knex.raw("uuid_generate_v4()"));
+        table.string("socialId").notNullable();
+        table.uuid("userId").notNullable();
+        table.enum("type", ["fb"]);
+        table.unique(["socialId", "userId", "type"]);
+        table
+          .foreign("userId")
+          .references("id")
+          .inTable(UserModel.tableName)
+          .onDelete("CASCADE");
+      })
+      .catch(logCath);
+  }
+
   process.exit();
 })();

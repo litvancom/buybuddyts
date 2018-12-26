@@ -8,17 +8,23 @@ const schema = Joi.string()
 
 export default class UserModel {
   public static tableName = "users";
-  public static friendsListTable = "friendList";
+  public static friendsListTableName = "friendList";
+  public static socialIdTableName = "socialId";
 
   private static get table() {
     return knex(UserModel.tableName);
   }
 
-  public static create(data: any) {
+  private static get socialIdTable() {
+    return knex(UserModel.socialIdTableName);
+  }
+
+  public static create(data: any): any {
     return knex
       .insert(data)
-      .returning(["id", "userName"])
-      .table(UserModel.tableName);
+      .returning(["id", "userName", "email"])
+      .table(UserModel.tableName)
+      .spread((res) => res);
   }
 
   public static findLogin(data: any) {
@@ -35,7 +41,7 @@ export default class UserModel {
 
   public static async addFriends(userId: string, ids: string[]) {
     const insetData = ids.map((item) => ({ userId, friendId: item }));
-    await knex(UserModel.friendsListTable)
+    await knex(UserModel.friendsListTableName)
       .insert(insetData)
       .returning("*");
     return knex(UserModel.tableName)
@@ -43,7 +49,7 @@ export default class UserModel {
       .whereIn("id", ids);
   }
   public static async deleteFriends(userId: string, ids: string[]) {
-    await knex(UserModel.friendsListTable)
+    await knex(UserModel.friendsListTableName)
       .delete()
       .where({ userId })
       .whereIn("friendId", ids);
@@ -51,8 +57,8 @@ export default class UserModel {
   }
 
   public static getFriends(id: string) {
-    return knex(UserModel.friendsListTable)
-      .innerJoin(UserModel.tableName, `${UserModel.tableName}.id`, `${UserModel.friendsListTable}.userId`)
+    return knex(UserModel.friendsListTableName)
+      .innerJoin(UserModel.tableName, `${UserModel.tableName}.id`, `${UserModel.friendsListTableName}.userId`)
       .select(`${UserModel.tableName}.*`)
       .first();
   }
@@ -63,5 +69,28 @@ export default class UserModel {
       .select()
       .where("id", "!=", userId)
       .andWhere((builder) => builder.where("email", "like", `${query}%`).orWhere("userName", "like", `${query}%`));
+  }
+
+  public static async fbLogin({ id, email }: any) {
+    const result = await UserModel.socialIdTable
+      .select(`${UserModel.tableName}.*`)
+      .innerJoin(UserModel.tableName, `${UserModel.tableName}.id`, `${UserModel.socialIdTableName}.userId`)
+      .where("socialId", id)
+      .andWhere("type", "fb")
+      .limit(1)
+      .first();
+
+    if (result) {
+      return result;
+    }
+
+    const user = await UserModel.create({
+      email,
+      userName: email
+    });
+
+    await UserModel.socialIdTable.insert({ type: "fb", userId: user.id, socialId: id });
+
+    return user;
   }
 }
