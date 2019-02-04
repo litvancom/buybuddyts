@@ -6,15 +6,15 @@ import { User } from "./User";
 export class ListItem {
   @PrimaryGeneratedColumn("uuid")
   public id: string;
-  @Column()
+  @Column({ length: 255 })
   public name: string;
-  @Column()
+  @Column({ length: 255 })
   public valueName: string;
   @Column({ type: "double precision" })
   public value: number;
-  @Column()
+  @Column({ length: 255 })
   public category: string;
-  @Column({ default: false })
+  @Column({ default: "false" })
   public checked: boolean;
   @Column({ type: "int" })
   public order: number;

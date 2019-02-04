@@ -6,7 +6,7 @@ import { ListItem } from "./ListItem";
 export class List {
   @PrimaryGeneratedColumn("uuid")
   public id: string;
-  @Column()
+  @Column({ length: 255 })
   public title: string;
   @ManyToOne((type) => User, (user) => user.lists)
   public user: User;

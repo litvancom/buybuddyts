@@ -6,9 +6,9 @@ import { User } from "./User";
 export class SharedList {
   @PrimaryGeneratedColumn("uuid")
   public id: string;
-  @Column()
+  @Column({ length: 255 })
   public password: string;
-  @Column({ enum: ["r", "rw"] })
+  @Column({ enum: ["r", "rw"], length: 5 })
   public chmod: string;
   @ManyToOne((type) => List)
   public list: List;

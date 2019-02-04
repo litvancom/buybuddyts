@@ -1,15 +1,20 @@
 import bluebird = require("bluebird");
 import jwt = require("jsonwebtoken");
-import UserModel from "../../db/model/user";
 import moment = require("moment");
 import requestPromise = require("request-promise");
+import { Inject, Injectable } from "@graphql-modules/core/dist/di";
+import { RepositoryProvider } from "./repositoryProvider";
+import { UserRepository } from "../repository/userRepository";
 
 const secret = "secret";
 //
 const jwtSignToken = bluebird.promisify(jwt.sign);
 
-export default class AuthService {
-  public static signToken(data: any) {
+@Injectable()
+export default class AuthProvider {
+  constructor(@Inject(RepositoryProvider) private repositoryProvider: RepositoryProvider) {}
+
+  public signToken(data: any) {
     const exp = moment()
       .utc()
       .add(1, "y")
@@ -25,20 +30,17 @@ export default class AuthService {
     );
   }
 
-  public static async checkAuth(authorization: any) {
+  public async checkAuth(authorization: any) {
     if (!authorization) {
       return null;
     }
     const {
       data: { id }
     }: any = jwt.verify(authorization, secret);
-    const [user = {}] = await UserModel.findUserById(id);
-    delete user.password;
-
-    return user;
+    return await this.repositoryProvider.getRepository(UserRepository).findOne(id);
   }
 
-  public static async fbCheckToken(token: any) {
+  public async fbCheckToken(token: any) {
     const options = {
       method: "GET",
       url: "https://graph.facebook.com/v3.2/me",

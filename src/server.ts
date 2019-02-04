@@ -26,7 +26,7 @@ setImmediate(async () => {
   // });
 
   const appModule = new GraphQLModule({
-    imports: [UserModule, ListModule, ListItemModule, SharedListModule]
+    imports: [UserModule]
   });
 
   const { schema, context } = appModule;

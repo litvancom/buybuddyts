@@ -4,13 +4,10 @@ import { SchemaDirectiveVisitor } from "apollo-server-express";
 import { defaultFieldResolver, GraphQLField } from "graphql";
 import { logCath } from "../utils/logger";
 import { IncomingMessage } from "http";
-import AuthService from "../services/auth";
+import AuthProvider from "../provider/authProvider";
+import { RepositoryProvider } from "../provider/repositoryProvider";
 
 export class IsAuthenticated extends SchemaDirectiveVisitor {
-  // public visitObject(object: GraphQLObjectType): GraphQLObjectType | void | null {
-  //   return super.visitObject(object);
-  // }
-
   public visitFieldDefinition(field: GraphQLField<any, any>) {
     const { resolve = defaultFieldResolver } = field;
     field.resolve = async function(...args) {
@@ -21,39 +18,19 @@ export class IsAuthenticated extends SchemaDirectiveVisitor {
       return await resolve.apply(this, args);
     };
   }
-  //
-  // public visitEnumValue(value: GraphQLEnumValue) {
-  //     value.isDeprecated = true;
-  //     value.deprecationReason = this.args.reason;
-  // }
 }
 
 export const DirectivesModule = new GraphQLModule({
   typeDefs: gql`
     directive @isAuthenticated on FIELD | FIELD_DEFINITION
   `,
-  schemaDirectives: {
-    isAuthenticated: IsAuthenticated
-  },
-  contextBuilder: async ({ req }: { req: IncomingMessage }, currentContext) => {
-    const {
-      headers: { authorization }
-    } = req;
+  providers: [AuthProvider, RepositoryProvider],
+  schemaDirectives: { isAuthenticated: IsAuthenticated },
+  async context(session, currentContext, { injector }) {
+    const authToken = session.req.headers.authorization;
+    const currentUser = await injector.get(AuthProvider).checkAuth(authToken);
     return {
-      currentUser: await AuthService.checkAuth(authorization).catch(logCath)
+      currentUser
     };
   }
 });
-
-// const context = async ({
-//   req: {
-//     headers: { authorization }
-//   }
-// }: {
-//   authorization: any;
-//   req: any;
-// }) => {
-//   return {
-//     currentUser: await checkAuth(authorization).catch(logCath)
-//   };
-// };
