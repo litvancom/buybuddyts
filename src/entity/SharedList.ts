@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { List } from "./List";
 import { User } from "./User";
 
@@ -10,8 +10,9 @@ export class SharedList {
   public password: string;
   @Column({ enum: ["r", "rw"], length: 5 })
   public chmod: string;
-  @ManyToOne((type) => List)
+  @ManyToOne(type => List)
   public list: List;
-  @ManyToOne((type) => User)
-  public receiver: User;
+  @ManyToMany(type => User)
+  @JoinTable()
+  public receivers: User[];
 }

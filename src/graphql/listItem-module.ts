@@ -1,11 +1,12 @@
 import { DirectivesModule } from "./directives";
 import gql from "graphql-tag";
-import { GraphQLModule } from "@graphql-modules/core";
-import ListModel from "../db/model/list";
-import ListItemModel from "../db/model/listItem";
+import { GraphQLModule, ModuleContext } from "@graphql-modules/core";
+import { RepositoryProvider } from "../provider/repositoryProvider";
+import { ListItemRepository } from "../repository/listItemRepository";
 
 export const ListItemModule = new GraphQLModule({
   imports: [DirectivesModule],
+  providers: [RepositoryProvider],
   typeDefs: gql`
     type ListItem {
       id: ID!
@@ -32,20 +33,29 @@ export const ListItemModule = new GraphQLModule({
     }
   `,
   resolvers: {
-    Query: {
-      listItem: async (_, { id }: { id: string }, context) => {
-        throw new Error("Not Implemented"); // todo implement
-      }
-    },
+    // Query: {
+    //   listItem: async (_, { id }: { id: string }, context) => {
+    //     throw new Error("Not Implemented"); // todo implement
+    //   }
+    // },
     Mutation: {
-      listItemCreate: async (_, { input }, context) => {
-        return ListItemModel.create(input);
+      listItemCreate: async (_, { input }, { injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListItemRepository)
+          .create(input);
       },
-      listItemUpdate: async (_, { id, input }, context) => {
-        return ListItemModel.update(id, input);
+      listItemUpdate: async (_, { id, input }, { injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListItemRepository)
+          .create(input);
       },
-      listItemDelete: async (_, { id }: { id: string }, context) => {
-        ListItemModel.delete(id);
+      listItemDelete: async (_, { id }: { id: string }, { injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListItemRepository)
+          .delete(id);
       }
     }
   }

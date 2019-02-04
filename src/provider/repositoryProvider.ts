@@ -1,6 +1,7 @@
 import { getCustomRepository, ObjectType, Repository } from "typeorm";
 import { UserRepository } from "../repository/userRepository";
 import { Injectable } from "@graphql-modules/core/dist/di";
+import { IBuyBuddyRepository } from "../repository/IBuyBuddyRepository";
 
 @Injectable()
 export class RepositoryProvider {
@@ -8,7 +9,7 @@ export class RepositoryProvider {
     return getCustomRepository(UserRepository);
   }
 
-  public getRepository<T>(repo: ObjectType<T>): T {
+  public getRepository<T extends IBuyBuddyRepository>(repo: ObjectType<T>): T {
     return getCustomRepository(repo);
   }
 }

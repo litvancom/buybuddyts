@@ -11,6 +11,7 @@ import { ListModule } from "./graphql/list-module";
 import { SharedListModule } from "./graphql/sharedList-module";
 import { ListItemModule } from "./graphql/listItem-module";
 import { connection } from "./config/connection";
+import { DirectivesModule } from "./graphql/directives";
 
 // @ts-ignore
 // const link = new HttpLink({ uri: "http://api.githunt.com/graphql", fetch });
@@ -26,17 +27,17 @@ setImmediate(async () => {
   // });
 
   const appModule = new GraphQLModule({
-    imports: [UserModule]
+    imports: [UserModule, DirectivesModule]
   });
 
   const { schema, context } = appModule;
 
-  const mergedSchema = mergeSchemas({
-    schemas: [schema /*executableSchema*/]
-  });
+  // const mergedSchema = mergeSchemas({
+  //   schemas: [schema /*executableSchema*/]
+  // });
 
   const server = new ApolloServer({
-    schema: mergedSchema,
+    schema,
     context,
     introspection: true
   });

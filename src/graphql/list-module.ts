@@ -1,13 +1,15 @@
 import { DirectivesModule } from "./directives";
 import gql from "graphql-tag";
-import { GraphQLModule } from "@graphql-modules/core";
+import { GraphQLModule, ModuleContext } from "@graphql-modules/core";
 import { ListItemModule } from "./listItem-module";
-import { logger } from "../utils/logger";
-import ListModel from "../db/model/list";
-import ListItemModel from "../db/model/listItem";
+
+import { RepositoryProvider } from "../provider/repositoryProvider";
+import { ListRepository } from "../repository/listRepository";
+import { ListItemRepository } from "../repository/listItemRepository";
 
 export const ListModule = new GraphQLModule({
   imports: [DirectivesModule, ListItemModule],
+  providers: [RepositoryProvider],
   typeDefs: gql`
     type List {
       id: ID!
@@ -31,24 +33,39 @@ export const ListModule = new GraphQLModule({
   `,
   resolvers: {
     List: {
-      items: async ({ id }, args, context) => {
-        return ListItemModel.findByListId(id);
+      items: async (root, args, { injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListItemRepository)
+          .find({ list: root });
       }
     },
     Query: {
-      list: async (_, { id }: { id: string }, context) => {
-        throw new Error("Not Implemented"); // todo implement
+      list: async (_, { id }: { id: string }, { currentUser: { id: user }, injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListRepository)
+          .findOne({ id, user });
       }
     },
     Mutation: {
-      listCreate: async (_, { input }, { currentUser: { id } }) => {
-        return ListModel.create(input, id);
+      listCreate: async (_, { input }, { currentUser: { id }, injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListRepository)
+          .create({ ...input, user: id });
       },
-      listUpdate: async (_, { input, id }, context) => {
-        return ListModel.update(id, input);
+      listUpdate: async (_, { input, id }, { injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListRepository)
+          .update({ id }, input);
       },
-      listDelete: async (_, { id }: { id: string }, context) => {
-        return ListModel.delete(id);
+      listDelete: async (_, { id }: { id: string }, { injector }: ModuleContext) => {
+        return injector
+          .get(RepositoryProvider)
+          .getRepository(ListRepository)
+          .delete(id);
       }
     }
   }
